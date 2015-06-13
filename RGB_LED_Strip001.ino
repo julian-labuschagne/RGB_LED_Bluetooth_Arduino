@@ -14,6 +14,10 @@ int redColorValue = 0;
 int greenColorValue = 0;
 int blueColorValue = 0;
 
+int cycleDelay = 30;
+
+int displayState = 0;
+
 void setup() {
   Serial.begin(9600);
   
@@ -36,33 +40,41 @@ void setup() {
 void loop() {
   
   while(Serial.available() > 0) {
-
-    redColorValue = Serial.parseInt();
-    EEPROM.write(0, redColorValue);
     
-    greenColorValue = Serial.parseInt();
-    EEPROM.write(1, greenColorValue);
+    char com = Serial.read();
     
-    blueColorValue = Serial.parseInt();
-    EEPROM.write(2, blueColorValue);
+    if(com == 's') {
+      
+      displayState = 0;
+      
+      redColorValue = Serial.parseInt();
+      greenColorValue = Serial.parseInt();
+      blueColorValue = Serial.parseInt();
+      
+      EEPROM.write(0, redColorValue);
+      EEPROM.write(1, greenColorValue);
+      EEPROM.write(2, blueColorValue);
+      
+      Serial.print("saved:");
+      Serial.print(redColorValue);
+      Serial.print(",");
+      Serial.print(greenColorValue);
+      Serial.print(",");
+      Serial.println(blueColorValue);
     
-    if(Serial.read() == '#') {
-      displayColor(redColorValue, greenColorValue, blueColorValue);
+    } else if (com == 'c') {
+      displayState = 1;
+      cycleDelay = Serial.parseInt();
     }
-    
-    Serial.print("Red: ");
-    Serial.println(redColorValue);
-    
-    Serial.print("Green: ");
-    Serial.println(greenColorValue);
-    
-    Serial.print("Blue: ");
-    Serial.println(blueColorValue);
     
   }
   
-  //Serial.print("Color value: ");
-  //Serial.println(colorValue);
+  // Display a set color or cycle colors
+  if (displayState == 0) {
+    displayColor(redColorValue, greenColorValue, blueColorValue);
+  } else if (displayState == 1) {
+    cycleColor();
+  }
   
 }
 
@@ -80,7 +92,7 @@ void cycleColor() {
     blue_value = 0;
     
     displayColor(red_value, green_value, blue_value);
-    delay(30);  
+    delay(cycleDelay);  
   }
   
   for (int i = 0; i < 256; i++) {
@@ -89,7 +101,7 @@ void cycleColor() {
     blue_value = i;
     
     displayColor(red_value, green_value, blue_value);
-    delay(30);  
+    delay(cycleDelay);  
   }
   
   for (int i = 0; i < 256; i++) {
@@ -98,6 +110,6 @@ void cycleColor() {
     blue_value--;
     
     displayColor(red_value, green_value, blue_value);
-    delay(30);  
+    delay(cycleDelay);  
   }
 }
