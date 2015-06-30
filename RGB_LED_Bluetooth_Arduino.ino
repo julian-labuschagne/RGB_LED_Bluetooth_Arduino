@@ -4,6 +4,8 @@
 #define GREEN_LED   10
 #define BLUE_LED    11
 
+#define CMD_LENGTH 64
+
 int colorValue = 0;
 
 int red_value = 255;
@@ -17,6 +19,8 @@ int blueColorValue = 0;
 int cycleDelay = 30;
 
 int displayState = 0;
+
+String serial_command = "";
 
 void setup() {
   Serial.begin(9600);
@@ -39,41 +43,61 @@ void setup() {
 
 void loop() {
   
-  while(Serial.available() > 0) {
-    
-    char com = Serial.read();
-    
-    if(com == 's') {
-      
-      displayState = 0;
-      
-      redColorValue = Serial.parseInt();
-      greenColorValue = Serial.parseInt();
-      blueColorValue = Serial.parseInt();
-      
-      EEPROM.write(0, redColorValue);
-      EEPROM.write(1, greenColorValue);
-      EEPROM.write(2, blueColorValue);
-      
-      Serial.print("saved:");
-      Serial.print(redColorValue);
-      Serial.print(",");
-      Serial.print(greenColorValue);
-      Serial.print(",");
-      Serial.println(blueColorValue);
-    
-    } else if (com == 'c') {
-      displayState = 1;
-      cycleDelay = Serial.parseInt();
-    }
-    
+  if(Serial.available()) {
+    serial_command = Serial.readString();
+    commandParse(serial_command);
   }
   
-  // Display a set color or cycle colors
-  if (displayState == 0) {
-    displayColor(redColorValue, greenColorValue, blueColorValue);
-  } else if (displayState == 1) {
-    cycleColor();
+}
+
+void commandParse(String cmd) {
+  
+  cmd.trim();
+  Serial.println(cmd);
+  
+  if (cmd.equals("AT")) {
+    Serial.println("OK");
+  } 
+  else if (cmd.startsWith("SETCOLOR", 3)) {
+    Serial.println("Set the color");
+    
+    //------------------------------
+    int redStart = cmd.indexOf('=');
+    int redEnd = cmd.indexOf(',');
+    
+    int greenStart = cmd.indexOf(',');
+    int greenEnd = cmd.indexOf(',', greenStart + 1);
+    
+    //int blueStart = cmd.indexOf(',', greenStart + 1);
+    //int blueEnd = cmd.indexOf(',', greenStart + 1);
+    int blueStart = greenEnd + 1;
+    
+    // ------------------------------------------
+    String red = cmd.substring(redStart + 1, redEnd);
+    int r = red.toInt();
+    
+    String green = cmd.substring(greenStart + 1, greenEnd);
+    int g = green.toInt();
+    
+    String blue = cmd.substring(blueStart);
+    int b = blue.toInt();
+    
+    Serial.println(r);
+    Serial.println(g);
+    Serial.println(b);
+    
+    displayColor(r, g, b);
+      
+    Serial.println("OK");
+  
+  } 
+  else if (cmd.startsWith("SAVECOLOR", 3)) {
+    Serial.println("Save the color");
+    Serial.println("OK");
+  }
+  else {
+    Serial.println("Unknown command");
+    Serial.println("ERROR");
   }
   
 }
