@@ -53,13 +53,13 @@ void loop() {
 void commandParse(String cmd) {
   
   cmd.trim();
-  Serial.println(cmd);
+  //Serial.println(cmd);
   
   if (cmd.equals("AT")) {
     Serial.println("OK");
   } 
   else if (cmd.startsWith("SETCOLOR", 3)) {
-    Serial.println("Set the color");
+    //Serial.println("Set the color");
     
     //------------------------------
     int redStart = cmd.indexOf('=');
@@ -82,13 +82,13 @@ void commandParse(String cmd) {
     String blue = cmd.substring(blueStart);
     int b = blue.toInt();
     
-    Serial.println(r);
-    Serial.println(g);
-    Serial.println(b);
+    //Serial.println(r);
+    //Serial.println(g);
+    //Serial.println(b);
     
     displayColor(r, g, b);
       
-    Serial.println("OK");
+    //Serial.println("OK");
   
   } 
   else if (cmd.startsWith("SAVECOLOR", 3)) {
