@@ -44,8 +44,20 @@ void setup() {
 void loop() {
   
   if(Serial.available()) {
-    serial_command = Serial.readString();
-    commandParse(serial_command);
+    
+    char c = Serial.read();
+    
+    if (c == 'c') {
+      int r = Serial.parseInt();
+      int g = Serial.parseInt();
+      int b = Serial.parseInt();
+
+      displayColor(r, g, b);
+    }
+    
+    
+    
+    //commandParse(serial_command);
   }
   
 }
